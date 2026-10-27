@@ -16,13 +16,15 @@ public static class CoinRunnerSceneBuilder
     private const string PrefabFolder = "Assets/Prefabs";
     private const string TileFolder = "Assets/Tiles";
     private const string SpriteFolder = "Assets/Sprites";
+    private const string TmpSettingsPath = "Assets/TextMesh Pro/Resources/TMP Settings.asset";
 
     [MenuItem("Coin Runner/Rebuild Lab Scene")]
     public static void Build()
     {
         EnsureFolders();
         EnsureTagsAndGroundLayer();
-        ImportTextMeshProResources();
+        if (!EnsureTextMeshProResources())
+            return;
 
         Sprite groundSprite = CreateSprite("GroundSprite", SpriteKind.Square, new Color32(139, 91, 61, 255));
         Sprite playerSprite = CreateSprite("PlayerSprite", SpriteKind.Capsule, new Color32(55, 190, 95, 255));
@@ -113,13 +115,36 @@ public static class CoinRunnerSceneBuilder
         AssetDatabase.SaveAssets();
     }
 
-    private static void ImportTextMeshProResources()
+    private static bool EnsureTextMeshProResources()
     {
-        if (TMP_Settings.defaultFontAsset != null)
-            return;
+        if (AssetDatabase.LoadAssetAtPath<TMP_Settings>(TmpSettingsPath) != null)
+            return true;
 
-        EditorApplication.ExecuteMenuItem("Window/TextMeshPro/Import TMP Essential Resources");
-        AssetDatabase.Refresh();
+        const string packagePath = "Packages/com.unity.ugui/Package Resources/TMP Essential Resources.unitypackage";
+        if (!File.Exists(packagePath))
+            throw new FileNotFoundException("TextMeshPro essential resources package was not found.", packagePath);
+
+        AssetDatabase.importPackageCompleted -= OnTmpResourcesImported;
+        AssetDatabase.importPackageFailed -= OnTmpResourcesImportFailed;
+        AssetDatabase.importPackageCompleted += OnTmpResourcesImported;
+        AssetDatabase.importPackageFailed += OnTmpResourcesImportFailed;
+        AssetDatabase.ImportPackage(packagePath, false);
+        Debug.Log("Importing TextMeshPro essential resources before building the Coin Runner scene.");
+        return false;
+    }
+
+    private static void OnTmpResourcesImported(string packageName)
+    {
+        AssetDatabase.importPackageCompleted -= OnTmpResourcesImported;
+        AssetDatabase.importPackageFailed -= OnTmpResourcesImportFailed;
+        Build();
+    }
+
+    private static void OnTmpResourcesImportFailed(string packageName, string errorMessage)
+    {
+        AssetDatabase.importPackageCompleted -= OnTmpResourcesImported;
+        AssetDatabase.importPackageFailed -= OnTmpResourcesImportFailed;
+        Debug.LogError($"Could not import TextMeshPro essential resources: {errorMessage}");
     }
 
     private static Tilemap CreateLevel(Tile tile)
@@ -261,7 +286,7 @@ public static class CoinRunnerSceneBuilder
         text.fontSize = fontSize;
         text.alignment = alignment;
         text.color = Color.white;
-        text.enableWordWrapping = false;
+        text.textWrappingMode = TextWrappingModes.NoWrap;
         text.font = TMP_Settings.defaultFontAsset;
         return text;
     }
