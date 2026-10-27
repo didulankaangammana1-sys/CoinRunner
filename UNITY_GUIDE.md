@@ -6,8 +6,8 @@
 2. In Unity Hub, choose **Add project from disk** and select the `CoinRunner` folder.
 3. Let Unity finish importing packages and compiling scripts. The project uses the Universal Render Pipeline, Tilemap, TextMeshPro, and the Input System package.
 4. Confirm **Edit > Project Settings > Player > Other Settings > Active Input Handling** is **Both**. This project uses the lab's classic keyboard calls while keeping Both enabled.
-5. In the top Unity menu, choose **Coin Runner > Rebuild Lab Scene** once. This creates the editable level, prefabs, interface, and `Assets/Scenes/CoinRunner.unity`. It also adds the scene to Build Settings.
-6. Save the scene, select the **Game** tab, and choose a 16:9 aspect ratio.
+5. Open `Assets/Scenes/CoinRunner.unity`. The level, prefabs, interface, and Build Settings entry are already included. Use **Coin Runner > Rebuild Lab Scene** only if you want to regenerate them.
+6. Select the **Game** tab, choose a 16:9 aspect ratio, and press **Play**.
 
 ## 2. Scene objects and lab coordinates
 
@@ -35,7 +35,7 @@ The Coin prefab has a trigger circle and the `Coin` tag. The Spike prefab has a 
 
 ## 4. Play and check
 
-Press **Play**, then use:
+Use:
 
 - **Left/Right** or **A/D** to run.
 - **Space** to jump from the ground.
